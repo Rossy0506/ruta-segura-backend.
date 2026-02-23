@@ -3,106 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruta Segura Pro - Sistema de Auxilio</title>
+    <title>Red Operativos Viales</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary: #1a1a2e; --danger: #e74c3c; --success: #2ecc71; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; }
-        .app-header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        #map { height: calc(100vh - 180px); width: 100%; }
-        .action-bar { padding: 15px; display: flex; flex-direction: column; gap: 10px; background: white; border-top: 2px solid #ddd; }
-        .btn { border: none; border-radius: 8px; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
-        .btn-panic { background: var(--danger); box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); animation: pulse 2s infinite; }
-        .btn-call { background: #34495e; text-decoration: none; text-align: center; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        .status-indicator { font-size: 12px; text-align: center; padding: 5px; background: #eee; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #121212; color: white; }
+        #map { height: 60vh; width: 100%; }
+        .login-overlay { position: fixed; inset: 0; background: #1a1a2e; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .panel { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        input, select { padding: 12px; border-radius: 8px; border: none; margin-bottom: 5px; width: 100%; box-sizing: border-box; }
+        .btn { border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
+        .btn-send { background: #27ae60; }
+        .status { font-size: 11px; text-align: center; color: #888; }
     </style>
 </head>
 <body>
 
-<div class="app-header">
-    <h3 style="margin:0;">🚨 RUTA SEGURA</h3>
-    <small>Central de Seguridad para Taxistas</small>
+<div id="login" class="login-overlay">
+    <h2>Bienvenido a la Red</h2>
+    <input type="email" id="email" placeholder="Correo Electrónico">
+    <input type="password" id="pass" placeholder="Contraseña">
+    <input type="text" id="alias" placeholder="Tu Alias (Ej: ElTioRuta)">
+    <button class="btn" style="background:#3498db" onclick="entrar()">ENTRAR AL MAPA</button>
 </div>
 
 <div id="map"></div>
+<div class="status" id="status">Esperando ingreso...</div>
 
-<div class="action-bar">
-    <button class="btn btn-panic" onclick="enviarAlerta()">🆘 ENVIAR ALERTA DE AUXILIO</button>
-    <a href="tel:105" class="btn btn-call">📞 LLAMAR A LA POLICÍA (105)</a>
+<div class="panel">
+    <select id="tipoOperativo">
+        <option value="Policía">👮 Policía (Rojo)</option>
+        <option value="Municipalidad">🏛️ Municipalidad (Azul)</option>
+        <option value="Sutran">🚛 Sutran (Amarillo)</option>
+    </select>
+    <input type="text" id="foto" placeholder="Link de foto (opcional)">
+    <button class="btn btn-send" onclick="enviarReporte()">📍 MARCAR OPERATIVO</button>
 </div>
-
-<div class="status-indicator" id="status">Esperando conexión...</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // CONFIGURACIÓN
-    const RENDER_URL = "https://ruta-segura-backend-hz7t.onrender.com";
-    var map = L.map('map').setView([-12.0464, -77.0428], 14); // Inicio en Lima
-    var grupoMarcadores = L.layerGroup().addTo(map);
+    const API = "https://ruta-segura-backend-hz7t.onrender.com";
+    let miAlias = "";
+    var map = L.map('map').setView([-12.0464, -77.0428], 14);
+    L.tileLayer('https://{s}.tile.map_server.org/{z}/{x}/{y}.png').addTo(map);
+    var marcadores = L.layerGroup().addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    function entrar() {
+        miAlias = document.getElementById('alias').value;
+        if(miAlias.length < 3) return alert("Pon un alias válido");
+        document.getElementById('login').style.display = 'none';
+        cargarDatos();
+    }
 
-    // FUNCIÓN: ENVIAR ALERTA
-    function enviarAlerta() {
-        const btn = document.querySelector('.btn-panic');
-        const status = document.getElementById('status');
-        
-        btn.disabled = true;
-        status.innerText = "Localizando unidad...";
-
-        navigator.geolocation.getCurrentPosition(function(pos) {
-            const payload = {
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude,
-                tipo: "BOTÓN DE PÁNICO ACTIVADO",
-                usuario: "Unidad_" + Math.floor(Math.random() * 9000 + 1000)
-            };
-
-            fetch(`${RENDER_URL}/reportar`, {
-                method: 'POST',
-                mode: 'cors', // Solución al error de conexión
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                status.innerText = "✅ ¡ALERTA RECIBIDA EN CENTRAL!";
-                status.style.color = "green";
-                L.marker([payload.lat, payload.lng]).addTo(grupoMarcadores)
-                    .bindPopup("<b>TU AUXILIO</b><br>Ayuda en camino").openPopup();
-                map.setView([payload.lat, payload.lng], 16);
-                setTimeout(() => { btn.disabled = false; }, 5000);
-            })
-            .catch(err => {
-                console.error(err);
-                status.innerText = "❌ Error de Red. Reintente.";
-                btn.disabled = false;
-            });
-        }, function() {
-            alert("Por favor, activa el GPS del celular.");
-            btn.disabled = false;
+    function getIconColor(tipo) {
+        let color = "red";
+        if(tipo === "Municipalidad") color = "blue";
+        if(tipo === "Sutran") color = "orange";
+        return new L.Icon({
+            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41]
         });
     }
 
-    // FUNCIÓN: CARGAR ALERTAS DE OTROS (Cada 8 segundos)
-    function sincronizarAlertas() {
-        fetch(`${RENDER_URL}/alertas`)
-            .then(res => res.json())
-            .then(data => {
-                grupoMarcadores.clearLayers();
-                data.forEach(a => {
-                    L.marker([a.lat, a.lng]).addTo(grupoMarcadores)
-                        .bindPopup(`<b>Peligro:</b> ${a.tipo}<br><b>ID:</b> ${a.usuario}`);
-                });
-                document.getElementById('status').innerText = "📡 Conectado y Sincronizado";
-            })
-            .catch(() => { document.getElementById('status').innerText = "⚠️ Reconectando..."; });
+    function enviarReporte() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            const data = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                tipo: document.getElementById('tipoOperativo').value,
+                usuario_alias: miAlias,
+                foto_url: document.getElementById('foto').value,
+                hora: new Date().toLocaleTimeString()
+            };
+
+            fetch(`${API}/reportar`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert("¡Operativo Reportado!");
+                cargarDatos();
+            });
+        });
     }
 
-    setInterval(sincronizarAlertas, 8000);
-    sincronizarAlertas();
-</script>
+    function cargarDatos() {
+        fetch(`${API}/alertas`)
+            .then(res => res.json())
+            .then(data => {
+                marcadores.clearLayers();
+                data.forEach(op => {
+                    let popup = `<b>${op.tipo}</b><br>Subido por: ${op.usuario_alias}<br>Hora: ${op.hora}`;
+                    if(op.foto_url) popup += `<br><img src="${op.foto_url}" width="100">`;
+                    
+                    L.marker([op.lat, op.lng], {icon: getIconColor(op.tipo)})
+                     .addTo(marcadores).bindPopup(popup);
+                });
+                document.getElementById('status').innerText = `Usuario: ${miAlias} | Red Activa ✅`;
+            });
+    }
 
+    setInterval(cargarDatos, 15000);
+</script>
 </body>
 </html>
