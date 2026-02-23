@@ -3,106 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruta Segura - Dashboard Pro</title>
+    <title>Ruta Segura Pro - Sistema de Auxilio</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f4f4f9; }
-        #map { height: 75vh; width: 100%; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
-        .header { background: #1a1a2e; color: white; padding: 15px; text-align: center; border-bottom: 4px solid #e74c3c; }
-        .controls { display: flex; justify-content: center; padding: 20px; gap: 10px; background: white; }
-        .btn-alert { 
-            background: #e74c3c; color: white; border: none; padding: 15px 30px; 
-            font-size: 18px; font-weight: bold; border-radius: 50px; cursor: pointer;
-            transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-        }
-        .btn-alert:active { transform: scale(0.95); background: #c0392b; }
-        .status-bar { font-size: 12px; color: #666; text-align: center; padding: 5px; }
+        :root { --primary: #1a1a2e; --danger: #e74c3c; --success: #2ecc71; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; }
+        .app-header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        #map { height: calc(100vh - 180px); width: 100%; }
+        .action-bar { padding: 15px; display: flex; flex-direction: column; gap: 10px; background: white; border-top: 2px solid #ddd; }
+        .btn { border: none; border-radius: 8px; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
+        .btn-panic { background: var(--danger); box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); animation: pulse 2s infinite; }
+        .btn-call { background: #34495e; text-decoration: none; text-align: center; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+        .status-indicator { font-size: 12px; text-align: center; padding: 5px; background: #eee; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h2 style="margin:0;">🚖 RUTA SEGURA</h2>
-    <div style="font-size: 14px; opacity: 0.8;">Panel de Seguridad en Tiempo Real</div>
-</div>
-
-<div class="controls">
-    <button class="btn-alert" onclick="enviarAlerta()">🚨 ENVIAR ALERTA DE AUXILIO</button>
+<div class="app-header">
+    <h3 style="margin:0;">🚨 RUTA SEGURA</h3>
+    <small>Central de Seguridad para Taxistas</small>
 </div>
 
 <div id="map"></div>
-<div class="status-bar" id="status">Conectado al servidor global: Render ✅</div>
+
+<div class="action-bar">
+    <button class="btn btn-panic" onclick="enviarAlerta()">🆘 ENVIAR ALERTA DE AUXILIO</button>
+    <a href="tel:105" class="btn btn-call">📞 LLAMAR A LA POLICÍA (105)</a>
+</div>
+
+<div class="status-indicator" id="status">Esperando conexión...</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 1. Configuración del Mapa (Inicia en Lima)
-    var map = L.map('map').setView([-12.0464, -77.0428], 14);
-    var marcadores = L.layerGroup().addTo(map);
+    // CONFIGURACIÓN
+    const RENDER_URL = "https://ruta-segura-backend-hz7t.onrender.com";
+    var map = L.map('map').setView([-12.0464, -77.0428], 14); // Inicio en Lima
+    var grupoMarcadores = L.layerGroup().addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // URL DE TU SERVIDOR EN RENDER
-    const API_URL = "https://ruta-segura-backend-hz7t.onrender.com";
-
-    // 2. Función para enviar alertas
+    // FUNCIÓN: ENVIAR ALERTA
     function enviarAlerta() {
-        document.getElementById('status').innerText = "Obteniendo ubicación...";
+        const btn = document.querySelector('.btn-panic');
+        const status = document.getElementById('status');
         
-        if (!navigator.geolocation) {
-            alert("Tu navegador no permite ver tu ubicación.");
-            return;
-        }
+        btn.disabled = true;
+        status.innerText = "Localizando unidad...";
 
         navigator.geolocation.getCurrentPosition(function(pos) {
-            const alerta = {
+            const payload = {
                 lat: pos.coords.latitude,
                 lng: pos.coords.longitude,
-                tipo: "S.O.S TAXISTA",
-                usuario: "Unidad_Movil_" + Math.floor(Math.random() * 1000)
+                tipo: "BOTÓN DE PÁNICO ACTIVADO",
+                usuario: "Unidad_" + Math.floor(Math.random() * 9000 + 1000)
             };
 
-            fetch(`${API_URL}/reportar`, {
+            fetch(`${RENDER_URL}/reportar`, {
                 method: 'POST',
+                mode: 'cors', // Solución al error de conexión
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(alerta)
+                body: JSON.stringify(payload)
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('status').innerText = "¡Alerta enviada correctamente!";
-                L.marker([alerta.lat, alerta.lng]).addTo(marcadores)
-                    .bindPopup("<b>¡TU ALERTA!</b><br>Ayuda en camino.").openPopup();
-                map.setView([alerta.lat, alerta.lng], 16);
-                setTimeout(actualizarMapa, 2000); // Recargar para ver otras alertas
+                status.innerText = "✅ ¡ALERTA RECIBIDA EN CENTRAL!";
+                status.style.color = "green";
+                L.marker([payload.lat, payload.lng]).addTo(grupoMarcadores)
+                    .bindPopup("<b>TU AUXILIO</b><br>Ayuda en camino").openPopup();
+                map.setView([payload.lat, payload.lng], 16);
+                setTimeout(() => { btn.disabled = false; }, 5000);
             })
             .catch(err => {
                 console.error(err);
-                alert("Error al conectar con Render. Revisa los logs.");
+                status.innerText = "❌ Error de Red. Reintente.";
+                btn.disabled = false;
             });
         }, function() {
-            alert("No se pudo obtener tu ubicación. Activa el GPS.");
+            alert("Por favor, activa el GPS del celular.");
+            btn.disabled = false;
         });
     }
 
-    // 3. Función para ver alertas de otros taxistas (Recarga automática cada 10 seg)
-    function actualizarMapa() {
-        fetch(`${API_URL}/alertas`)
+    // FUNCIÓN: CARGAR ALERTAS DE OTROS (Cada 8 segundos)
+    function sincronizarAlertas() {
+        fetch(`${RENDER_URL}/alertas`)
             .then(res => res.json())
-            .then(alertas => {
-                marcadores.clearLayers();
-                alertas.forEach(a => {
-                    L.marker([a.lat, a.lng])
-                        .addTo(marcadores)
-                        .bindPopup(`<b>Incidente:</b> ${a.tipo}<br><b>Usuario:</b> ${a.usuario}`);
+            .then(data => {
+                grupoMarcadores.clearLayers();
+                data.forEach(a => {
+                    L.marker([a.lat, a.lng]).addTo(grupoMarcadores)
+                        .bindPopup(`<b>Peligro:</b> ${a.tipo}<br><b>ID:</b> ${a.usuario}`);
                 });
+                document.getElementById('status').innerText = "📡 Conectado y Sincronizado";
             })
-            .catch(err => console.log("Buscando nuevas alertas..."));
+            .catch(() => { document.getElementById('status').innerText = "⚠️ Reconectando..."; });
     }
 
-    // Actualizar cada 10 segundos automáticamente
-    setInterval(actualizarMapa, 10000);
-    actualizarMapa();
+    setInterval(sincronizarAlertas, 8000);
+    sincronizarAlertas();
 </script>
 
 </body>
