@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "rutasegura-537c3",
+  "private_key_id": "6b5e83b893ae25075f357e8f5d8dc69da9f5567e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCowuo8A9szm3E7\nuCGChgAQRp/yeQ4utehkx9mrvn6o2PnOVggUgX7aUHMiIpf+tVXN/eV75mfwojz0\noutpGN6Q1gtB7Efr8KNdJPrL7d0AqiVAvc0G4ZroaYFQPC27eCLaNYN8sLpSYinX\nqZ9SOqyVJOFwlccQFg4zRU1Z0maArFt6pP4czxu4kc91UHZe49MoeVnCZGARyM/n\nDElS1cx3miIEWFILxgbicrN9TFeXHqJg68S0iNgl1eY7oxeu4Ae7CnOp/QI50m+e\nl3ygrTXTLMzetv5xzU5efzfsaqYM0UcU2YvGINtv77LXXMvM8WfzM/35tyEU9YTv\ncZ20sMfbAgMBAAECggEAOjKRhWXNC4SA7ZfHkpP0ZKh+Uyd1AR3BSTP0ODpmwoKk\nzwezHKM1pELXGX/1i6RsNS/oGiywTnccbz7Z0PH/GtJ9qlu5x79CDwaIKJhcPPTw\nCN4LXOKjQZ/UtN8z5DD/T+HheLgXYP6yMEmyBDDwwDQqPGGidsUsW3j8PkwFBj0a\nWI9mG/XQMcwvanP/GQXRumxxeoxLufxmH26aQ5n4rmNqX0z9TQ4yMCY5m5qB29/r\nkGf3/BdU0tNphSmAPZ4qbw99vh5Ne4pX2+1pGIyM+uayyypdBJWn9ctvA2AeWAjT\nCMcrI/8OI61GQiiI0etuJPfy7Bvq2xVD8qwIuyyJfQKBgQDeFgAd92XFPvI/mj9q\n9mOmpLBODBxCo35Dv+LQd++uFywUpMVYsSXdvR32Kgj91lwdr8qHlIPhZyrCCNLt\nysopwfWSNYHiu389/ipbfmXVxsBq8wCJuvJuC3FjIAfKKoP/r0mDL10s0GQFCYuI\no4MU9x/lAyXHdPw0wdD0K6LtXwKBgQDCiEybSLx16CH1QsGxAAUJ9V3hYHVLxdZr\ngowSr+6mhnz2JnD9yE0Vm7IFiyw6ARP9YpBqkyDYv6a8o41m/n156tsAQg63DwDe\neIMMGYs8a18X8FUaNHuY34SZU8F+u7D2hm/+22TAzPxPvmow3nQYOd92Gaq3vJ5z\nrDQR0/r7BQKBgFgjEQ7TdS8viQJW294+RFQJPfLreXe03NJUX9ZuEs/bYGIc9jj5\nrNZwTGi6S/E5Vjtt3YmrFh+pSt3QlK1McqjZ0fShiZeK47edm//NjOqnQwvuvoLq\nj3W+0tQNDSpdbx9U2G7YqDi1x0v8esTSZ541aRIBCsg6lDD3zk5o1vMvAoGANn0h\nIBnWmBwmbuF9CYwc3TY6TqfLEydeMQ0HGTDoYwKmu/f2jE9vsA7FZaIfCDxHEiFq\nnD+L4sqD9LDHKcM8+Epdf4wBPStZrfcJlfkNtCXLJBRwcf+jYyWwqZX5S/tczSDI\n/BUN+qcwQVHvwrJ8yFBllFoKJJ8TrwjcKOY8ldUCgYEA214+7LF1UBNoAfMc688A\nsfo0qFxcuPZsX16Be3+CL6xYNmD3TdTxl1vtagKB5o2LwB4n8rqNNLsO/meEmWnt\noSw9GStu5Ha9inQRL1BYrAngk/CCK+Yt9ryuSn/HEQ7lFRhMH3pG5FnbDYfBapzJ\nVix/PY2VLpgai12otyrd28A=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@rutasegura-537c3.iam.gserviceaccount.com",
+  "client_id": "115417266838523393648",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40rutasegura-537c3.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
