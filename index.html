@@ -23,7 +23,7 @@
             hablar("Procesando reporte");
             
             try {
-                const respuesta = await fetch('http://127.0.0.1:8000/reportar', {
+                const respuesta = await fetch('http://ruta-segura-backend-hz7t.onrender.com/reportar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
